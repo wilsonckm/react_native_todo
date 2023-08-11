@@ -1,12 +1,27 @@
-import { StyleSheet, Text, Button, View, TextInput } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  Button,
+  View,
+  TextInput,
+  ScrollView,
+  SafeAreaView,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebaseConfig";
-import { addDoc, collection, onSnapshot } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
 
 const Lists = ({ navigation }) => {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
 
+  //read todo
   useEffect(() => {
     const todoRef = collection(db, "todos");
     const unsubscribe = onSnapshot(todoRef, (querySnapshot) => {
@@ -23,48 +38,59 @@ const Lists = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
-  const addTodo = async () => {
-    try {
+  //Create todo:
+  const createTodo = async (e) => {
+    if (newTodo === "") {
+      alert("Please enter todo");
+    } else {
       const now = new Date();
       const timestamp = now.toISOString();
-      await addDoc(collection(db, "todos"), { id: timestamp, text: newTodo });
-      console.log("Document successfully written");
+      await addDoc(collection(db, "todos"), {
+        createdOn: timestamp,
+        text: newTodo,
+      });
       setNewTodo("");
-    } catch (error) {
-      console.error("Error writing document", error);
     }
   };
 
+  //Delete Todo
+  const deleteTodo = async (id) => {
+    await deleteDoc(doc(db, "todos", id));
+  };
+
   return (
-    <View>
-      <Text>List</Text>
+    <SafeAreaView>
+      <ScrollView>
+        <Text>List</Text>
 
-      <View>
-        {todos.map((todo) => (
-          <View style={styles.container} key={todo.id}>
-            <Text> {todo.text}</Text>
-            <Button
-              title="Details"
-              onPress={() => navigation.navigate("Details", { todo })}
-            ></Button>
-          </View>
-        ))}
-      </View>
+        <View>
+          {todos.map((todo, index) => (
+            <View style={styles.container} key={index}>
+              <Text> {todo.text}</Text>
+              <Button
+                title="Details"
+                onPress={() => navigation.navigate("Details", { todo })}
+              />
+              <Button title="Delete" onPress={() => deleteTodo(todo.id)} />
+            </View>
+          ))}
+        </View>
 
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          value={newTodo}
-          onChangeText={(text) => setNewTodo(text)}
-          placeholder="What do you have to do?"
-        />
-        <Button
-          title="Add Todo"
-          onPress={() => addTodo()}
-          disabled={todos === ""}
-        />
-      </View>
-    </View>
+        <View style={styles.form}>
+          <TextInput
+            style={styles.input}
+            value={newTodo}
+            onChangeText={(text) => setNewTodo(text)}
+            placeholder="What do you have to do?"
+          />
+          <Button
+            title="Add Todo"
+            onPress={() => createTodo()}
+            disabled={todos === ""}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
