@@ -1,7 +1,5 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
 import List from "./app/screens/Lists";
 import Details from "./app/screens/details";
 
