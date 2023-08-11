@@ -22,6 +22,7 @@ const Lists = ({ navigation }) => {
 
     return () => unsubscribe();
   }, []);
+
   const addTodo = async () => {
     try {
       const now = new Date();
